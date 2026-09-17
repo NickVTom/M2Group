@@ -11,25 +11,25 @@ st.set_page_config(page_title="Electricity Price Correlation", layout="wide")
 st.title("⚡ European Electricity Price Correlation Analysis")
 st.markdown("Analyze correlations between electricity prices across European grids")
 
-# Define grid zones and their neighbors
+# Define grid zones
 GRIDS = {
-    "DE-LU": {"name": "Germany-Luxembourg", "neighbors": ["FR", "AT", "DK"]},
-    "DK1": {"name": "Denmark West", "neighbors": ["DK2", "DE-LU"]},
-    "DK2": {"name": "Denmark East", "neighbors": ["DK1", "SE"]},
-    "FR": {"name": "France", "neighbors": ["DE-LU", "IT", "ES"]},
-    "IT": {"name": "Italy", "neighbors": ["FR", "AT"]},
-    "AT": {"name": "Austria", "neighbors": ["DE-LU", "IT", "CZ"]},
-    "SE1": {"name": "Sweden North", "neighbors": ["SE2", "NO"]},
-    "SE2": {"name": "Sweden Central", "neighbors": ["SE1", "SE3", "DK"]},
-    "SE3": {"name": "Sweden South", "neighbors": ["SE2", "SE4", "DK"]},
-    "SE4": {"name": "Sweden East", "neighbors": ["SE3"]},
-    "NO1": {"name": "Norway South", "neighbors": ["NO2", "SE"]},
-    "NO2": {"name": "Norway Central", "neighbors": ["NO1", "NO3"]},
-    "NO3": {"name": "Norway Mid", "neighbors": ["NO2", "NO4", "SE"]},
-    "NO4": {"name": "Norway North", "neighbors": ["NO3"]},
-    "NO5": {"name": "Norway Far North", "neighbors": ["NO4"]},
-    "CZ": {"name": "Czech Republic", "neighbors": ["AT", "DE-LU", "PL"]},
-    "PL": {"name": "Poland", "neighbors": ["CZ", "DE-LU"]},
+    "DE-LU": {"name": "Germany-Luxembourg"},
+    "DK1": {"name": "Denmark West"},
+    "DK2": {"name": "Denmark East"},
+    "FR": {"name": "France"},
+    "IT": {"name": "Italy"},
+    "AT": {"name": "Austria"},
+    "SE1": {"name": "Sweden North"},
+    "SE2": {"name": "Sweden Central"},
+    "SE3": {"name": "Sweden South"},
+    "SE4": {"name": "Sweden East"},
+    "NO1": {"name": "Norway South"},
+    "NO2": {"name": "Norway Central"},
+    "NO3": {"name": "Norway Mid"},
+    "NO4": {"name": "Norway North"},
+    "NO5": {"name": "Norway Far North"},
+    "CZ": {"name": "Czech Republic"},
+    "PL": {"name": "Poland"},
 }
 
 def are_neighbors(grid1, grid2):
