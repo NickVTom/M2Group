@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import requests
-import plotly.figure_factory as ff
 import plotly.graph_objects as go
 from datetime import datetime
 import time
@@ -158,7 +157,7 @@ else:
         # Display correlation matrix heatmap
         st.markdown("### 📈 Correlation Matrix Heatmap")
         
-        fig = ff.create_annotated_heatmap(
+        fig = go.Figure(data=go.Heatmap(
             z=corr_matrix.values,
             x=corr_matrix.columns.tolist(),
             y=corr_matrix.index.tolist(),
@@ -166,13 +165,12 @@ else:
             zmid=0.5,
             text=np.round(corr_matrix.values, 3),
             texttemplate='%{text:.3f}',
-            showscale=True,
-            reversescale=False,
-        )
+            textfont={"size": 10},
+            colorbar=dict(title="Correlation"),
+        ))
         
         fig.update_layout(
             height=600,
-            width=800,
             title_text="Electricity Price Correlations Between Grids",
             xaxis_title="Grid",
             yaxis_title="Grid",
