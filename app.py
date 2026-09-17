@@ -32,22 +32,7 @@ GRIDS = {
     "PL": {"name": "Poland"},
 }
 
-def are_neighbors(grid1, grid2):
-    """Check if two grids are neighbors"""
-    neighbors1 = GRIDS[grid1]["neighbors"]
-    neighbors2 = GRIDS[grid2]["neighbors"]
-    
-    # Extract country codes for comparison
-    country1 = grid1.split("-")[0] if "-" not in grid1 else grid1
-    country2 = grid2.split("-")[0] if "-" not in grid2 else grid2
-    
-    # Check if in each other's neighbor lists
-    if any(n.startswith(country2) for n in neighbors1):
-        return True
-    if any(n.startswith(country1) for n in neighbors2):
-        return True
-    
-    return False
+
 
 @st.cache_data(ttl=3600)
 def fetch_grid_data(grid):
@@ -107,12 +92,10 @@ def get_correlation_pairs(corr_matrix):
         for j in range(i + 1, len(grids)):
             grid1, grid2 = grids[i], grids[j]
             corr_value = corr_matrix.loc[grid1, grid2]
-            is_neighbor = are_neighbors(grid1, grid2)
             pairs.append({
                 'grid1': grid1,
                 'grid2': grid2,
-                'correlation': corr_value,
-                'is_neighbor': is_neighbor
+                'correlation': corr_value
             })
     
     return pairs
@@ -190,13 +173,11 @@ else:
             top_5 = pairs_df.nlargest(5, 'correlation')
             
             for idx, row in top_5.iterrows():
-                neighbor_badge = "🤝 **Neighboring**" if row['is_neighbor'] else "📍 Not neighbors"
                 corr_value = row['correlation']
                 
                 st.markdown(f"""
                 **{row['grid1']} ↔ {row['grid2']}**
                 - Correlation: `{corr_value:.4f}`
-                - {neighbor_badge}
                 """)
         
         # Top 5 Lowest Correlations
@@ -205,13 +186,11 @@ else:
             bottom_5 = pairs_df.nsmallest(5, 'correlation')
             
             for idx, row in bottom_5.iterrows():
-                neighbor_badge = "🤝 **Neighboring**" if row['is_neighbor'] else "📍 Not neighbors"
                 corr_value = row['correlation']
                 
                 st.markdown(f"""
                 **{row['grid1']} ↔ {row['grid2']}**
                 - Correlation: `{corr_value:.4f}`
-                - {neighbor_badge}
                 """)
         
         # Summary statistics
@@ -225,12 +204,7 @@ else:
             st.metric("Average Correlation", f"{avg_corr:.4f}")
         
         with col2:
-            neighbor_avg = pairs_df[pairs_df['is_neighbor']]['correlation'].mean()
-            st.metric("Neighbor Average", f"{neighbor_avg:.4f}")
-        
-        with col3:
-            non_neighbor_avg = pairs_df[~pairs_df['is_neighbor']]['correlation'].mean()
-            st.metric("Non-Neighbor Average", f"{non_neighbor_avg:.4f}")
+            st.write()
         
         with col4:
             num_pairs = len(pairs_df)
@@ -239,9 +213,8 @@ else:
         # Data table
         with st.expander("📋 View All Correlations"):
             display_df = pairs_df.copy()
-            display_df['Neighbors'] = display_df['is_neighbor'].apply(lambda x: "Yes" if x else "No")
             display_df['Correlation'] = display_df['correlation'].apply(lambda x: f"{x:.4f}")
-            display_df = display_df[['grid1', 'grid2', 'Correlation', 'Neighbors']].rename(
+            display_df = display_df[['grid1', 'grid2', 'Correlation']].rename(
                 columns={'grid1': 'Grid 1', 'grid2': 'Grid 2'}
             )
             st.dataframe(display_df, use_container_width=True)
