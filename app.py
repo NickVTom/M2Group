@@ -1,10 +1,7 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import requests
-import plotly.graph_objects as go
 from datetime import datetime
-import time
 
 st.set_page_config(page_title="Electricity Price Correlation", layout="wide")
 
@@ -83,23 +80,6 @@ def create_correlation_matrix(data_dict):
     corr_matrix = combined.corr()
     return corr_matrix
 
-def get_correlation_pairs(corr_matrix):
-    """Extract all unique correlation pairs"""
-    pairs = []
-    grids = corr_matrix.index.tolist()
-    
-    for i in range(len(grids)):
-        for j in range(i + 1, len(grids)):
-            grid1, grid2 = grids[i], grids[j]
-            corr_value = corr_matrix.loc[grid1, grid2]
-            pairs.append({
-                'grid1': grid1,
-                'grid2': grid2,
-                'correlation': corr_value
-            })
-    
-    return pairs
-
 # Main app
 col1, col2 = st.columns([3, 1])
 
@@ -136,85 +116,3 @@ else:
     
     if corr_matrix is None:
         st.error("Could not create correlation matrix. Try different grids.")
-    else:
-        # Display correlation matrix heatmap
-        st.markdown("### 📈 Correlation Matrix Heatmap")
-        
-        fig = go.Figure(data=go.Heatmap(
-            z=corr_matrix.values,
-            x=corr_matrix.columns.tolist(),
-            y=corr_matrix.index.tolist(),
-            colorscale='RdBu',
-            zmid=0.5,
-            text=np.round(corr_matrix.values, 3),
-            texttemplate='%{text:.3f}',
-            textfont={"size": 10},
-            colorbar=dict(title="Correlation"),
-        ))
-        
-        fig.update_layout(
-            height=600,
-            title_text="Electricity Price Correlations Between Grids",
-            xaxis_title="Grid",
-            yaxis_title="Grid",
-        )
-        
-        st.plotly_chart(fig, use_container_width=True)
-        
-        # Get all correlation pairs and sort
-        pairs = get_correlation_pairs(corr_matrix)
-        pairs_df = pd.DataFrame(pairs)
-        
-        col1, col2 = st.columns(2)
-        
-        # Top 5 Highest Correlations
-        with col1:
-            st.markdown("### 🔥 Top 5 Highest Correlations")
-            top_5 = pairs_df.nlargest(5, 'correlation')
-            
-            for idx, row in top_5.iterrows():
-                corr_value = row['correlation']
-                
-                st.markdown(f"""
-                **{row['grid1']} ↔ {row['grid2']}**
-                - Correlation: `{corr_value:.4f}`
-                """)
-        
-        # Top 5 Lowest Correlations
-        with col2:
-            st.markdown("### ❄️ Top 5 Lowest Correlations")
-            bottom_5 = pairs_df.nsmallest(5, 'correlation')
-            
-            for idx, row in bottom_5.iterrows():
-                corr_value = row['correlation']
-                
-                st.markdown(f"""
-                **{row['grid1']} ↔ {row['grid2']}**
-                - Correlation: `{corr_value:.4f}`
-                """)
-        
-        # Summary statistics
-        st.markdown("---")
-        st.markdown("### 📊 Summary Statistics")
-        
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            avg_corr = pairs_df['correlation'].mean()
-            st.metric("Average Correlation", f"{avg_corr:.4f}")
-        
-        with col2:
-            st.write()
-        
-        with col4:
-            num_pairs = len(pairs_df)
-            st.metric("Total Pairs Analyzed", num_pairs)
-        
-        # Data table
-        with st.expander("📋 View All Correlations"):
-            display_df = pairs_df.copy()
-            display_df['Correlation'] = display_df['correlation'].apply(lambda x: f"{x:.4f}")
-            display_df = display_df[['grid1', 'grid2', 'Correlation']].rename(
-                columns={'grid1': 'Grid 1', 'grid2': 'Grid 2'}
-            )
-            st.dataframe(display_df, use_container_width=True)
