@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import requests
+import plotly.graph_objects as go
 from datetime import datetime
 
 st.set_page_config(page_title="Electricity Price Correlation", layout="wide")
@@ -116,3 +118,26 @@ else:
     
     if corr_matrix is None:
         st.error("Could not create correlation matrix. Try different grids.")
+    else:
+        st.markdown("### 📈 Correlation Matrix Heatmap")
+        
+        fig = go.Figure(data=go.Heatmap(
+            z=corr_matrix.values,
+            x=corr_matrix.columns.tolist(),
+            y=corr_matrix.index.tolist(),
+            colorscale='RdBu',
+            zmid=0.5,
+            text=np.round(corr_matrix.values, 3),
+            texttemplate='%{text:.3f}',
+            textfont={"size": 10},
+            colorbar=dict(title="Correlation"),
+        ))
+        
+        fig.update_layout(
+            height=600,
+            title_text="Electricity Price Correlations Between Grids",
+            xaxis_title="Grid",
+            yaxis_title="Grid",
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
